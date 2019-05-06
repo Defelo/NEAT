@@ -1,1 +1,2 @@
 POPULATION: int = 300
+CROSSOVER_CHANCE: float = 0.75

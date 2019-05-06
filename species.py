@@ -1,6 +1,9 @@
+import math
+import random
 from typing import List
 
 from genome import Genome
+from neatconfig import *
 
 
 class Species:
@@ -10,16 +13,26 @@ class Species:
             self.genomes.append(genome)
 
     def calculate_genome_adjusted_fitness(self):
-        pass
+        for genome in self.genomes:
+            genome.adjusted_fitness = genome.fitness / len(self.genomes)
 
     def get_total_adjusted_fitness(self) -> float:
-        pass
+        return sum(genome.adjusted_fitness for genome in self.genomes)
 
     def remove_weak_genomes(self):
-        pass
+        self.genomes.sort(key=lambda genome: genome.fitness, reverse=True)
+        survive_count: int = math.ceil(len(self.genomes) / 2)
+        self.genomes: List[Genome] = self.genomes[:survive_count]
 
     def get_top_genome(self) -> Genome:
-        pass
+        return max(self.genomes, key=lambda genome: genome.fitness)
 
     def breed_child(self) -> Genome:
-        pass
+        if random.random() < CROSSOVER_CHANCE:
+            parent1: Genome = random.choice(self.genomes)
+            parent2: Genome = random.choice(self.genomes)
+            child: Genome = Genome.cross_over(parent1, parent2)
+        else:
+            child: Genome = Genome(random.choice(self.genomes))
+        child.mutate()
+        return child

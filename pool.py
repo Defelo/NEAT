@@ -24,12 +24,7 @@ class Pool:
                 genome.fitness = evaluator(genome)
 
     def get_top_genome(self) -> Genome:
-        top_genome: Genome = None
-        for species in self.species:
-            genome: Genome = species.get_top_genome()
-            if top_genome is None or genome.fitness > top_genome.fitness:
-                top_genome = genome
-        return top_genome
+        return max((species.get_top_genome() for species in self.species), key=lambda genome: genome.fitness)
 
     def calculate_total_adjusted_fitness(self) -> float:
         return sum(species.get_total_adjusted_fitness() for species in self.species)
