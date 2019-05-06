@@ -19,7 +19,7 @@ class Genome:
         pass
 
     @staticmethod
-    def is_same_species(genome1: 'Genome', genome2: 'Genome') -> 'Genome':
+    def is_same_species(genome1: 'Genome', genome2: 'Genome') -> bool:
         pass
 
     def generate_network(self):
