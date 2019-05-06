@@ -39,12 +39,13 @@ class Pool:
 
     def breed_new_generation(self):
         self.calculate_genome_adjusted_fitness()
-        total_adjusted_fitness: float = self.calculate_total_adjusted_fitness()
 
         self.remove_weak_genomes_from_species()
 
         survived_species: List[Species] = []
         children: List[Genome] = []
+
+        total_adjusted_fitness: float = self.calculate_total_adjusted_fitness()
 
         carry_over: float = 0
         for species in self.species:

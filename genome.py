@@ -75,9 +75,10 @@ class Genome:
         if n:
             delta: float = EXCESS_COEFFICIENT * excess + DISJOINT_COEFFICIENT * disjoint
             delta /= n
-            delta += WEIGHT_COEFFICIENT * weight / matching
+            if matching > 0:
+                delta += WEIGHT_COEFFICIENT * weight / matching
             return delta < COMPATIBILITY_THRESHOLD
-        return False
+        return True
 
     def generate_network(self):
         self.nodes.clear()
@@ -102,12 +103,10 @@ class Genome:
         for i in range(INPUTS):
             self.nodes[i].value = inputs[i]
 
-        for i in sorted(self.nodes) + [*range(INPUTS + 1, INPUTS + 1 + OUTPUTS)]:
-            if i < INPUTS + OUTPUTS + 1:
-                continue
+        for i in [*filter(lambda i: i >= INPUTS + OUTPUTS + 1, sorted(self.nodes)), *range(INPUTS + 1, INPUTS + 1 + OUTPUTS)]:
             self.nodes[i].value = Genome.sigmoid(
                 sum(
-                    self.nodes[connection.into].value
+                    self.nodes[connection.into].value * connection.weight * connection.enabled
                     for connection in self.nodes[i].incoming
                 )
             )
@@ -115,7 +114,7 @@ class Genome:
 
     @staticmethod
     def sigmoid(x: float) -> float:
-        return 1 / (1 + math.exp(-x))
+        return 1 / (1 + math.exp(-10 * x))
 
     def mutate(self):
         if random.random() < WEIGHT_MUTATION_CHANCE:
@@ -138,8 +137,9 @@ class Genome:
                     connection.weight = 4 * random.random() - 2
 
     def mutate_add_connection(self):
-        random1: int = random.choice(lambda i: i < INPUTS + 1 or i >= INPUTS + 1 + OUTPUTS, self.nodes)
-        random2: int = random.choice(lambda i: i >= INPUTS + 1, self.nodes)
+        self.generate_network()
+        random1: int = random.choice([*filter(lambda i: i < INPUTS + 1 or i >= INPUTS + 1 + OUTPUTS, self.nodes)])
+        random2: int = random.choice([*filter(lambda i: i >= INPUTS + 1, self.nodes)])
         if random1 >= random2:
             return
         if any(connection.into == random1 and connection.out == random2 for connection in self.connection_gene_list):
@@ -149,7 +149,7 @@ class Genome:
         )
 
     def mutate_add_node(self):
-        enabled: List[ConnectionGene] = filter(lambda con: con.enabled, self.connection_gene_list)
+        enabled: List[ConnectionGene] = [*filter(lambda con: con.enabled, self.connection_gene_list)]
         if not enabled:
             return
         self.generate_network()
