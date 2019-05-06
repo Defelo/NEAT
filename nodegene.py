@@ -4,6 +4,6 @@ from connectiongene import ConnectionGene
 
 
 class NodeGene:
-    def __init__(self):
-        self.value: float = 0
+    def __init__(self, value: float):
+        self.value: float = value
         self.incoming: List[ConnectionGene] = []
