@@ -17,7 +17,8 @@ class Genome:
         if genome is not None:
             self.fitness: float = genome.fitness
             self.adjusted_fitness: float = genome.adjusted_fitness
-            self.connection_gene_list: List[ConnectionGene] = genome.connection_gene_list
+            for connection in genome.connection_gene_list:
+                self.connection_gene_list.append(connection.copy())
 
     @staticmethod
     def cross_over(parent1: 'Genome', parent2: 'Genome') -> 'Genome':
