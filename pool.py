@@ -15,6 +15,7 @@ class Pool:
         for species in self.species:
             if Genome.is_same_species(species.genomes[0], genome):
                 species.genomes.append(genome)
+                species.previous_top_fitness = max(species.previous_top_fitness, genome.fitness)
                 return
         self.species.append(Species(genome))
 
@@ -37,10 +38,24 @@ class Pool:
         for species in self.species:
             species.calculate_genome_adjusted_fitness()
 
+    def remove_stale_species(self):
+        top_top_fitness: float = self.get_top_genome().fitness
+        for i in range(len(self.species))[::-1]:
+            species: Species = self.species[i]
+            top_fitness: float = species.get_top_genome().fitness
+            if top_fitness <= species.previous_top_fitness:
+                species.staleness += 1
+            else:
+                species.staleness = 0
+            species.previous_top_fitness = top_fitness
+            if species.staleness >= 15 and top_fitness < top_top_fitness:
+                del self.species[i]
+
     def breed_new_generation(self):
         self.calculate_genome_adjusted_fitness()
 
         self.remove_weak_genomes_from_species()
+        self.remove_stale_species()
 
         survived_species: List[Species] = []
         children: List[Genome] = []
@@ -59,7 +74,10 @@ class Pool:
             if nchild < 1:
                 continue
 
-            survived_species.append(Species(species.get_top_genome()))
+            new_species: Species = Species(species.get_top_genome())
+            new_species.previous_top_fitness = species.previous_top_fitness
+            new_species.staleness = species.staleness
+            survived_species.append(new_species)
             for _ in range(1, nchild):
                 children.append(species.breed_child())
 

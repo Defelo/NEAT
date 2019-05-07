@@ -9,6 +9,8 @@ from neatconfig import *
 class Species:
     def __init__(self, genome: Genome = None):
         self.genomes: List[Genome] = []
+        self.previous_top_fitness: float = 0
+        self.staleness: int = 0
         if genome is not None:
             self.genomes.append(genome)
 

@@ -72,7 +72,7 @@ class Genome:
                 disjoint += 1
             else:
                 excess += 1
-        n: int = matching + disjoint + excess
+        n: int = max(len(gene_map1), len(gene_map2))
         if n:
             delta: float = EXCESS_COEFFICIENT * excess + DISJOINT_COEFFICIENT * disjoint
             delta /= n
@@ -115,7 +115,7 @@ class Genome:
 
     @staticmethod
     def sigmoid(x: float) -> float:
-        return 1 / (1 + math.exp(-10 * x))
+        return 1 / (1 + math.exp(-4.9 * x))
 
     def mutate(self):
         if random.random() < WEIGHT_MUTATION_CHANCE:
