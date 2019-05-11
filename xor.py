@@ -5,7 +5,7 @@ from genome import Genome
 from pool import Pool
 
 evaluator: Evaluator = Evaluator([([i, j], [i ^ j]) for i in range(2) for j in range(2)])
-pool: Pool = Pool()
+pool: Pool = Pool(300, 2, 1)
 generation: int = 1
 while True:
     pool.evaluate_fitness(evaluator.evaluate)

@@ -1,7 +1,6 @@
 from typing import List, Tuple
 
 from genome import Genome
-from neatconfig import *
 
 TestCase = Tuple[List[float], List[float]]
 
@@ -17,5 +16,5 @@ class Evaluator:
             error: float = 0
             for expected, actual in zip(expected_output, network_output):
                 error += abs(expected - actual)
-            fitness += OUTPUTS - error
+            fitness += genome.output_nodes - error
         return fitness

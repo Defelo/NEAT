@@ -35,6 +35,6 @@ class Species:
             parent2: Genome = random.choice(self.genomes)
             child: Genome = Genome.cross_over(parent1, parent2)
         else:
-            child: Genome = Genome(random.choice(self.genomes))
+            child: Genome = random.choice(self.genomes).copy()
         child.mutate()
         return child

@@ -9,16 +9,21 @@ from nodegene import NodeGene
 
 
 class Genome:
-    def __init__(self, genome: 'Genome' = None):
+    def __init__(self, input_nodes: int, output_nodes: int):
+        self.input_nodes: int = input_nodes
+        self.output_nodes: int = output_nodes
         self.fitness: float = 0
         self.adjusted_fitness: float = 0
         self.connection_gene_list: List[ConnectionGene] = []
         self.nodes: Dict[int, NodeGene] = {}
-        if genome is not None:
-            self.fitness: float = genome.fitness
-            self.adjusted_fitness: float = genome.adjusted_fitness
-            for connection in genome.connection_gene_list:
-                self.connection_gene_list.append(connection.copy())
+
+    def copy(self) -> 'Genome':
+        genome: Genome = Genome(self.input_nodes, self.output_nodes)
+        genome.fitness: float = self.fitness
+        genome.adjusted_fitness: float = self.adjusted_fitness
+        for connection in self.connection_gene_list:
+            genome.connection_gene_list.append(connection.copy())
+        return genome
 
     @staticmethod
     def cross_over(parent1: 'Genome', parent2: 'Genome') -> 'Genome':
@@ -32,7 +37,7 @@ class Genome:
         for connection in parent2.connection_gene_list:
             gene_map2[connection.innovation] = connection
 
-        child: Genome = Genome()
+        child: Genome = Genome(parent1.input_nodes, parent1.output_nodes)
         for key in {*gene_map1, *gene_map2}:
             if key in gene_map1 and key in gene_map2:
                 trait: ConnectionGene = random.choice([gene_map1, gene_map2])[key].copy()
@@ -84,11 +89,11 @@ class Genome:
     def generate_network(self):
         self.nodes.clear()
 
-        for i in range(INPUTS):
+        for i in range(self.input_nodes):
             self.nodes[i] = NodeGene(0)
-        self.nodes[INPUTS] = NodeGene(1)
+        self.nodes[self.input_nodes] = NodeGene(1)
 
-        for i in range(INPUTS + 1, INPUTS + 1 + OUTPUTS):
+        for i in range(self.input_nodes + 1, self.input_nodes + 1 + self.output_nodes):
             self.nodes[i] = NodeGene(0)
 
         for connection in self.connection_gene_list:
@@ -101,17 +106,18 @@ class Genome:
     def evaluate_network(self, inputs: List[float]) -> List[float]:
         self.generate_network()
 
-        for i in range(INPUTS):
+        for i in range(self.input_nodes):
             self.nodes[i].value = inputs[i]
 
-        for i in [*filter(lambda i: i >= INPUTS + OUTPUTS + 1, sorted(self.nodes)), *range(INPUTS + 1, INPUTS + 1 + OUTPUTS)]:
+        for i in [*filter(lambda i: i >= self.input_nodes + self.output_nodes + 1, sorted(self.nodes)),
+                  *range(self.input_nodes + 1, self.input_nodes + 1 + self.output_nodes)]:
             self.nodes[i].value = Genome.sigmoid(
                 sum(
                     self.nodes[connection.into].value * connection.weight * connection.enabled
                     for connection in self.nodes[i].incoming
                 )
             )
-        return [self.nodes[i].value for i in range(INPUTS + 1, INPUTS + 1 + OUTPUTS)]
+        return [self.nodes[i].value for i in range(self.input_nodes + 1, self.input_nodes + 1 + self.output_nodes)]
 
     @staticmethod
     def sigmoid(x: float) -> float:
@@ -139,8 +145,11 @@ class Genome:
 
     def mutate_add_connection(self):
         self.generate_network()
-        random1: int = random.choice([*filter(lambda i: i < INPUTS + 1 or i >= INPUTS + 1 + OUTPUTS, self.nodes)])
-        random2: int = random.choice([*filter(lambda i: i >= INPUTS + 1, self.nodes)])
+        random1: int = random.choice(list(filter(
+            lambda i: i < self.input_nodes + 1 or i >= self.input_nodes + 1 + self.output_nodes,
+            self.nodes
+        )))
+        random2: int = random.choice([*filter(lambda i: i >= self.input_nodes + 1, self.nodes)])
         if random1 >= random2:
             return
         if any(connection.into == random1 and connection.out == random2 for connection in self.connection_gene_list):

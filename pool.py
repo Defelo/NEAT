@@ -1,15 +1,17 @@
 from typing import List, Callable
 
 from genome import Genome
-from neatconfig import *
 from species import Species
 
 
 class Pool:
-    def __init__(self):
+    def __init__(self, population: int, input_nodes: int, output_nodes: int):
+        self.population: int = population
+        self.input_nodes: int = input_nodes
+        self.output_nodes = output_nodes
         self.species: List[Species] = []
-        for _ in range(POPULATION):
-            self.add_to_species(Genome())
+        for _ in range(population):
+            self.add_to_species(Genome(input_nodes, output_nodes))
 
     def add_to_species(self, genome: Genome):
         for species in self.species:
@@ -64,7 +66,7 @@ class Pool:
 
         carry_over: float = 0
         for species in self.species:
-            fchild: float = POPULATION * (species.get_total_adjusted_fitness() / total_adjusted_fitness)
+            fchild: float = self.population * (species.get_total_adjusted_fitness() / total_adjusted_fitness)
             nchild: int = int(fchild)
             carry_over += fchild - nchild
             if carry_over >= 1:
