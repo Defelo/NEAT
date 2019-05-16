@@ -23,7 +23,7 @@ class Species:
 
     def remove_weak_genomes(self):
         self.genomes.sort(key=lambda genome: genome.fitness, reverse=True)
-        survive_count: int = math.ceil(len(self.genomes) / 2)
+        survive_count: int = math.ceil(len(self.genomes) / 10)
         self.genomes: List[Genome] = self.genomes[:survive_count]
 
     def get_top_genome(self) -> Genome:

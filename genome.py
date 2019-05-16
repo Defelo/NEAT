@@ -43,13 +43,13 @@ class Genome:
                 trait: ConnectionGene = random.choice([gene_map1, gene_map2])[key].copy()
                 if (not gene_map1[key].enabled) or (not gene_map2[key].enabled) and random.random() < 0.75:
                     trait.enabled = False
-            elif parent1.fitness == parent2.fitness:
-                trait: ConnectionGene = random.choice([gene_map1, gene_map2]).get(key, None)
+            elif key in gene_map1:
+                trait: ConnectionGene = gene_map1[key]
             else:
-                trait: ConnectionGene = gene_map1.get(key, None)
+                # continue
+                trait: ConnectionGene = gene_map2[key]
 
-            if trait is not None:
-                child.connection_gene_list.append(trait.copy())
+            child.connection_gene_list.append(trait.copy())
 
         return child
 
@@ -137,11 +137,10 @@ class Genome:
 
     def mutate_weight(self):
         for connection in self.connection_gene_list:
-            if random.random() < WEIGHT_CHANCE:
-                if random.random() < PERTURB_CHANCE:
-                    connection.weight += (2 * random.random() - 1) * STEPS
-                else:
-                    connection.weight = 4 * random.random() - 2
+            if random.random() < PERTURB_CHANCE:
+                connection.weight += random.gauss(0, 1)
+            else:
+                connection.weight = 4 * random.random() - 2
 
     def mutate_add_connection(self):
         self.generate_network()
