@@ -7,12 +7,15 @@ class Species:
     def __init__(self, p=None):
         self.genomes = []
         self.best_fitness = 0
+        self.average_fitness = 0
         self.staleness = 0
         self.rep = None
+        self.champ = None
         if p is not None:
             self.genomes.append(p)
             self.best_fitness = p.fitness
             self.rep = p.clone()
+            self.champ = p.clone()
 
     def same_species(self, g):
         excess_and_disjoint = self.get_excess_disjoint(g, self.rep)
@@ -76,8 +79,15 @@ class Species:
             self.staleness = 0
             self.best_fitness = self.genomes[0].fitness
             self.rep = self.genomes[0]
+            self.champ = self.genomes[0].clone()
         else:
             self.staleness += 1
+
+    def set_average(self):
+        s = 0
+        for i in range(len(self.genomes)):
+            s += self.genomes[i].fitness
+        self.average_fitness = s / len(self.genomes)
 
     def give_me_baby(self, innovation_history):
         if random.random() < 0.25:
